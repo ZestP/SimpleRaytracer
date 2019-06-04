@@ -154,6 +154,9 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="hitable.h" />
     <ClInclude Include="hitable_list.h" />
+    <ClInclude Include="lambertian.h" />
+    <ClInclude Include="material.h" />
+    <ClInclude Include="metal.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ray.h" />
     <ClInclude Include="SimpleRaytracer.h" />
@@ -164,6 +167,9 @@
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="hitable.cpp" />
     <ClCompile Include="hitable_list.cpp" />
+    <ClCompile Include="lambertian.cpp" />
+    <ClCompile Include="material.cpp" />
+    <ClCompile Include="metal.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

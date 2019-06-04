@@ -22,15 +22,8 @@ inline void vec3::make_unit_vector()
 }
 
 
-inline vec3 & vec3::operator+=(const vec3 & v2)
-{
-	e[0] += v2.e[0];
-	e[1] += v2.e[1];
-	e[2] += v2.e[2];
-	return *this;
-}
 
-inline vec3 & vec3::operator-=(const vec3 & v2)
+vec3 & vec3::operator-=(const vec3 & v2)
 {
 	e[0] -= v2.e[0];
 	e[1] -= v2.e[1];
@@ -38,7 +31,7 @@ inline vec3 & vec3::operator-=(const vec3 & v2)
 	return *this;
 }
 
-inline vec3 & vec3::operator*=(const vec3 & v2)
+vec3 & vec3::operator*=(const vec3 & v2)
 {
 	e[0] *= v2.e[0];
 	e[1] *= v2.e[1];
@@ -46,7 +39,7 @@ inline vec3 & vec3::operator*=(const vec3 & v2)
 	return *this;
 }
 
-inline vec3 & vec3::operator/=(const vec3 & v2)
+vec3 & vec3::operator/=(const vec3 & v2)
 {
 	e[0] /= v2.e[0];
 	e[1] /= v2.e[1];
@@ -54,7 +47,7 @@ inline vec3 & vec3::operator/=(const vec3 & v2)
 	return *this;
 }
 
-inline vec3 & vec3::operator*=(const float t)
+vec3 & vec3::operator*=(const float t)
 {
 	e[0] *= t;
 	e[1] *= t;
@@ -62,7 +55,7 @@ inline vec3 & vec3::operator*=(const float t)
 	return *this;
 }
 
-inline vec3 & vec3::operator/=(const float t)
+vec3 & vec3::operator/=(const float t)
 {
 	e[0] /= t;
 	e[1] /= t;

@@ -57,12 +57,18 @@ public:
 			(-(v1.e[0] * v2.e[2] - v1.e[2] * v2.e[0])),
 			(v1.e[0] * v2.e[1] - v1.e[1] * v2.e[0]));
 	}
-	inline vec3& operator+=(const vec3 &v2);
-	inline vec3& operator-=(const vec3 &v2);
-	inline vec3& operator*=(const vec3 &v2);
-	inline vec3& operator/=(const vec3 &v2);
-	inline vec3& operator*=(const float t);
-	inline vec3& operator/=(const float t);
+	inline vec3& operator+=(const vec3 &v2)
+	{
+		e[0] += v2.e[0];
+		e[1] += v2.e[1];
+		e[2] += v2.e[2];
+		return *this;
+	}
+	vec3& operator-=(const vec3 &v2);
+	vec3& operator*=(const vec3 &v2);
+	vec3& operator/=(const vec3 &v2);
+	vec3& operator*=(const float t);
+	vec3& operator/=(const float t);
 	inline float length() const {
 		return sqrt(e[0] * e[0] + e[1] * e[1] + e[2] * e[2]);
 	}
