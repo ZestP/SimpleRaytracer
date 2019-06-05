@@ -11,9 +11,52 @@
 #include "camera.h"
 #include "lambertian.h"
 #include "metal.h"
+#include "dielectric.h"
+#include <thread>
 #define MAXFLOAT 3.40E38
 using namespace std;
 ofstream fout("test.ppm");
+
+hitable *random_scene()
+{
+	int n = 500;
+	hitable **list = new hitable*[n + 1];
+	list[0] = new sphere(vec3(0, -1000, 0), 1000, new lambertian(vec3(0.5, 0.5, 0.5)));
+	int i = 1;
+	for (int a = -11; a < 11; a++)
+	{
+		for (int b = -11; b < 11; b++)
+		{
+			float choose_mat = rand() % 10000 / 10000.0;
+			vec3 center(a + 0.9*(rand() % 10000 / 10000.0),0.2, b + 0.9*(rand() % 10000 / 10000.0));
+			if ((center - vec3(4, 0.2, 0)).length() > 0.9)
+			{
+				if (choose_mat < 0.8)
+				{
+					list[i++] = new sphere(center, 0.2, new lambertian(vec3((rand() % 10000 / 10000.0)*
+						(rand() % 10000 / 10000.0), (rand() % 10000 / 10000.0)*
+						(rand() % 10000 / 10000.0), (rand() % 10000 / 10000.0)*
+						(rand() % 10000 / 10000.0))));
+				}
+				else if (choose_mat < 0.95)
+				{
+					list[i++] = new sphere(center, 0.2, new metal(vec3(0.5*(1+ (rand() % 10000 / 10000.0)),
+						0.5*(1 + (rand() % 10000 / 10000.0)),
+						0.5*(1 + (rand() % 10000 / 10000.0))), 0.5*((rand() % 10000 / 10000.0))));
+				}
+				else
+				{
+					list[i++] = new sphere(center, 0.2, new dielectric(1.5));
+				}
+			}
+		}
+	}
+	list[i++] = new sphere(vec3(0, 1, 0), 1, new dielectric(1.5));
+	list[i++] = new sphere(vec3(-4, 1, 0), 1, new lambertian(vec3(0.4, 0.2, 0.1)));
+	list[i++] = new sphere(vec3(4, 1, 0), 1, new metal(vec3(0.7, 0.6, 0.5), 0));
+	return new hitable_list(list, i);
+}
+
 
 float hit_sphere(const vec3& center, float radius, const ray& r)
 {
@@ -77,33 +120,64 @@ vec3 color(const ray& r, hitable *world,int depth)
 		return (1.0 - t)*vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
 	}
 }
+int i, j, nx, ny, cnt;
+camera cam;
+hitable* world;
+vec3 col;
+void gather()
+{
+	//cout << "gathering" << cnt<<endl;
+	float u = float(i + rand() % 10000 / 10000.0) / float(nx);
+	float v = float(j + rand() % 10000 / 10000.0) / float(ny);
+	ray r = cam.get_ray(u, v);
+	vec3 p = r.point_at_parameter(2.0);
+	col += color(r, world, 0);
+	//cout << "gathering complete" << cnt<<endl;
+	cnt++;
+}
+
 int main()
 {
 	srand(time(NULL));
-	int nx = 800;
-	int ny = 400;
-	int ns = 100;
+	nx = 200;
+	ny = 100;
+	int ns = 10;
 	fout << "P3\n" << nx << " " << ny << "\n255\n";
+	float R = cos(M_PI / 4);
+	hitable *list[5];
+	list[0] = new sphere(vec3(0, 0, -1), 0.5,new lambertian(vec3(0.1,0.2,0.5)));
+	list[1] = new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.8, 0.8, 0.0)));
+	list[2] = new sphere(vec3(1, 0, -1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 1));
+	list[3] = new sphere(vec3(-1, 0, -1), 0.5, new dielectric(1.5));
+	list[4] = new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5));
+	world = new hitable_list(list, 5);
+	/*hitable *list[2];
+	list[0] = new sphere(vec3(-R, 0, -1), R, new lambertian(vec3(0, 0, 1)));
+	list[1] = new sphere(vec3(R, 0, -1), R, new lambertian(vec3(1, 0, 0.0)));
 	
-	hitable *list[4];
-	list[0] = new sphere(vec3(0, 0, -1), 0.5,new metal(vec3(0.8,0.8,0.8),0.2));
-	list[2] = new sphere(vec3(1, 0, -1), 0.5, new metal(vec3(0.8, 0.8, 0.8), 1));
-	list[3] = new sphere(vec3(-1, 0, -1), 0.5, new metal(vec3(0.8, 0.8, 0.8), 0));
-	list[1] = new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.5, 0.7, 1.0)));
-	hitable *world = new hitable_list(list, 4);
-	camera cam;
-	for (int j = ny - 1; j >= 0; j--) {
-		for (int i = 0; i < nx; i++)
+	hitable *world = new hitable_list(list, 2);*/
+	//world=random_scene();
+	vec3 lookfrom(3, 3, 2);
+	vec3 lookat(0, 0, -1);
+	float dist_to_focus = (lookfrom - lookat).length();
+	float aperture = 2.0;
+	cam=camera(lookfrom,lookat,vec3(0,1,0),20,float(nx)/float(ny),aperture,dist_to_focus);
+	for (j = ny - 1; j >= 0; j--) {
+		for (i = 0; i < nx; i++)
 		{
-			vec3 col(0, 0, 0);
-			for (int s = 0; s < ns; s++)
+			col=vec3(0, 0, 0);
+			cnt = 0;
+			thread* ths[100];
+			/*for (int s = 0; s < ns; s++)
 			{
-				float u = float(i+ rand() % 10000 / 10000.0) / float(nx);
-				float v = float(j+ rand() % 10000 / 10000.0) / float(ny);
-				ray r = cam.get_ray(u, v);
-				vec3 p = r.point_at_parameter(2.0);
-				col += color(r, world,0);
+				
+				ths[s]=new thread(gather);
 			}
+			for (int s = 0; s < ns; s++)
+				ths[s]->join();*/
+			for (int s = 0; s < ns; s++)
+				gather();
+			cnt = 0;
 			col /= float(ns);
 			col = vec3(sqrt(col[0]), sqrt(col[1]), sqrt(col[2]));
 			int ir = int(255.99*col[0]);

@@ -48,6 +48,9 @@
     <ClInclude Include="metal.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="dielectric.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -81,6 +84,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="metal.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dielectric.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
