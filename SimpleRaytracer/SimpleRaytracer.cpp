@@ -12,7 +12,7 @@
 #include "lambertian.h"
 #include "metal.h"
 #include "dielectric.h"
-#include <thread>
+
 #define MAXFLOAT 3.40E38
 using namespace std;
 ofstream fout("test.ppm");
@@ -120,10 +120,11 @@ vec3 color(const ray& r, hitable *world,int depth)
 		return (1.0 - t)*vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
 	}
 }
-int i, j, nx, ny, cnt;
+int i, j, nx, ny,ns, cnt;
 camera cam;
 hitable* world;
 vec3 col;
+
 void gather()
 {
 	//cout << "gathering" << cnt<<endl;
@@ -131,17 +132,16 @@ void gather()
 	float v = float(j + rand() % 10000 / 10000.0) / float(ny);
 	ray r = cam.get_ray(u, v);
 	vec3 p = r.point_at_parameter(2.0);
+	
 	col += color(r, world, 0);
-	//cout << "gathering complete" << cnt<<endl;
-	cnt++;
-}
 
+}
 int main()
 {
 	srand(time(NULL));
-	nx = 200;
-	ny = 100;
-	int ns = 10;
+	nx = 800;
+	ny = 600;
+	ns = 10;
 	fout << "P3\n" << nx << " " << ny << "\n255\n";
 	float R = cos(M_PI / 4);
 	hitable *list[5];
@@ -156,27 +156,33 @@ int main()
 	list[1] = new sphere(vec3(R, 0, -1), R, new lambertian(vec3(1, 0, 0.0)));
 	
 	hitable *world = new hitable_list(list, 2);*/
-	//world=random_scene();
-	vec3 lookfrom(3, 3, 2);
-	vec3 lookat(0, 0, -1);
-	float dist_to_focus = (lookfrom - lookat).length();
-	float aperture = 2.0;
-	cam=camera(lookfrom,lookat,vec3(0,1,0),20,float(nx)/float(ny),aperture,dist_to_focus);
+	world=random_scene();
+	vec3 lookfrom(13, 2, 3);
+	vec3 lookat(0, 0, 0);
+	float dist_to_focus = 10.0;
+	float aperture = 0.1;
+
+	cam=camera(lookfrom, lookat, vec3(0, 1, 0), 20, float(nx) / float(ny), aperture, dist_to_focus);
+	
 	for (j = ny - 1; j >= 0; j--) {
 		for (i = 0; i < nx; i++)
 		{
-			col=vec3(0, 0, 0);
+			col = vec3(0, 0, 0);
 			cnt = 0;
-			thread* ths[100];
-			/*for (int s = 0; s < ns; s++)
+
+			//for (int s = 0; s < ns; s++)
+			//{
+			//	HANDLE thr = CreateThread(NULL, 0, gather, NULL, 0, NULL);
+			//}
+			//WaitForSingleObject(hsem1, INFINITE);
+			int s;
+			#pragma omp parallel for
+			for (s = 0; s < ns; s++)
 			{
-				
-				ths[s]=new thread(gather);
-			}
-			for (int s = 0; s < ns; s++)
-				ths[s]->join();*/
-			for (int s = 0; s < ns; s++)
 				gather();
+			}
+			//cout << "ThreadFinished"<<endl;
+			//Sleep(10000);
 			cnt = 0;
 			col /= float(ns);
 			col = vec3(sqrt(col[0]), sqrt(col[1]), sqrt(col[2]));
